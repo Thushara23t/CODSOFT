@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        #taskInput, #updateInput {
+            width: 80%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .button {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .task-item {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-item button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+        .task-item button:hover {
+            background-color: #0056b3;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter a new task">
+    <button class="button" onclick="addTask()">Add Task</button>
+    <ul class="task-list" id="taskList"></ul>
+    <div id="updateSection" style="display:none; margin-top:20px;">
+        <input type="text" id="updateInput" placeholder="Update your task">
+        <button class="button" onclick="confirmUpdate()">Confirm Update</button>
+    </div>
+</div>
+
+<script>
+    const taskList = document.getElementById('taskList');
+    const taskInput = document.getElementById('taskInput');
+    const updateSection = document.getElementById('updateSection');
+    const updateInput = document.getElementById('updateInput');
+    let updateIndex = null;
+    const serverUrl = 'http://localhost:8080';
+
+    async function fetchTasks() {
+        const response = await fetch(`${serverUrl}/tasks`);
+        const tasks = await response.json();
+        taskList.innerHTML = '';
+        tasks.forEach((task, index) => {
+            const li = document.createElement('li');
+            li.className = 'task-item';
+            li.innerHTML = `
+                <span>${task}</span>
+                <button onclick="showUpdateTask(${index})">Update</button>
+                <button class="delete-btn" onclick="removeTask(${index})">Delete</button>
+            `;
+            taskList.appendChild(li);
+        });
+    }
+
+    async function addTask() {
+        const taskText = taskInput.value.trim();
+        if (taskText) {
+            const response = await fetch(`${serverUrl}/tasks`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task: taskText })
+            });
+            if (response.ok) {
+                taskInput.value = '';
+                fetchTasks();
+            } else {
+                alert("Failed to add task.");
+            }
+        } else {
+            alert("Please enter a task.");
+        }
+    }
+
+    async function removeTask(taskId) {
+        const response = await fetch(`${serverUrl}/tasks/${taskId}`, { method: 'DELETE' });
+        if (response.ok) {
+            fetchTasks();
+        } else {
+            alert("Failed to remove task.");
+        }
+    }
+
+    function showUpdateTask(taskId) {
+        updateIndex = taskId;
+        updateInput.value = '';
+        updateSection.style.display = 'block';
+        updateInput.focus();
+    }
+
+    async function confirmUpdate() {
+        const updatedTaskText = updateInput.value.trim();
+        if (updatedTaskText) {
+            const response = await fetch(`${serverUrl}/tasks/${updateIndex}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ task: updatedTaskText })
+            });
+            if (response.ok) {
+                updateSection.style.display = 'none';
+                fetchTasks();
+            } else {
+                alert("Failed to update task.");
+            }
+        } else {
+            alert("Please enter the updated task.");
+        }
+    }
+
+    fetchTasks();
+</script>
+
+</body>
+</html>
