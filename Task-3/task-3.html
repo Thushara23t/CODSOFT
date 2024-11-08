@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock-Paper-Scissors Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f8ff;
+            margin: 0;
+        }
+        h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .game-container {
+            text-align: center;
+            margin: 20px;
+        }
+        .choices {
+            margin-top: 20px;
+        }
+        button {
+            font-size: 18px;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: blueviolet;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .result, .score {
+            font-size: 1.2em;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Rock-Paper-Scissors</h1>
+    <div class="game-container">
+        <p>Choose Rock, Paper, or Scissors:</p>
+        <div class="choices">
+            <button onclick="playGame('rock')">Rock</button>
+            <button onclick="playGame('paper')">Paper</button>
+            <button onclick="playGame('scissors')">Scissors</button>
+        </div>
+        <p id="computer-choice" class="result"></p>
+        <p id="game-result" class="result"></p>
+        <p id="score" class="score">Score - You: 0, Computer: 0</p>
+        <button onclick="resetGame()">Reset Game</button>
+    </div>
+
+    <script>
+        let userScore = 0;
+        let computerScore = 0;
+
+        function getComputerChoice() {
+            const choices = ['rock', 'paper', 'scissors'];
+            return choices[Math.floor(Math.random() * 3)];
+        }
+
+        function determineWinner(userChoice, computerChoice) {
+            if (userChoice === computerChoice) {
+                return "It's a tie!";
+            } else if (
+                (userChoice === 'rock' && computerChoice === 'scissors') ||
+                (userChoice === 'scissors' && computerChoice === 'paper') ||
+                (userChoice === 'paper' && computerChoice === 'rock')
+            ) {
+                userScore++;
+                return "You win!";
+            } else {
+                computerScore++;
+                return "Computer wins!";
+            }
+        }
+
+        function playGame(userChoice) {
+            const computerChoice = getComputerChoice();
+            const result = determineWinner(userChoice, computerChoice);
+
+            document.getElementById('computer-choice').textContent = `Computer chose: ${computerChoice.charAt(0).toUpperCase() + computerChoice.slice(1)}`;
+            document.getElementById('game-result').textContent = result;
+            document.getElementById('score').textContent = `Score - You: ${userScore}, Computer: ${computerScore}`;
+        }
+
+        function resetGame() {
+            userScore = 0;
+            computerScore = 0;
+            document.getElementById('computer-choice').textContent = '';
+            document.getElementById('game-result').textContent = '';
+            document.getElementById('score').textContent = `Score - You: 0, Computer: 0`;
+        }
+    </script>
+
+</body>
+</html>
